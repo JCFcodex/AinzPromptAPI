@@ -3,7 +3,5 @@ dist
 .env
 .git
 .gitignore
-docs
 tests
 coverage
-*.md
