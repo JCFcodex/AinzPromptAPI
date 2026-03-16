@@ -18,6 +18,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/docs ./docs
 
 EXPOSE 3000
 CMD ["node", "dist/server.js"]

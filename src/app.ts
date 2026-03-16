@@ -17,8 +17,13 @@ app.use(express.json({ limit: "1mb" }));
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use(express.static(path.join(__dirname, "..", "public")));
 
+// Docsify documentation site (uses hash routing — no SPA fallback needed)
+const docsDir = path.join(__dirname, "..", "docs");
+app.use("/docs", express.static(docsDir));
+
 app.use(router);
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
 app.use(errorHandler); // must be last
 
 export default app;
+

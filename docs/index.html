@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AinzPromptAPI — Docs</title>
+  <meta name="description" content="API documentation for AinzPromptAPI — a production-grade LLM proxy gateway wrapping Groq API." />
+
+  <!-- Docsify dark theme -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.min.css" />
+
+  <style>
+    :root {
+      --base-font-size: 15px;
+      --theme-color: #a78bfa;
+      --theme-color-secondary: #7c3aed;
+      --sidebar-background: #0f0a1e;
+      --sidebar-border-color: rgba(167, 139, 250, 0.15);
+      --sidebar-nav-link-color: #c4b5fd;
+      --sidebar-nav-link-color--active: #a78bfa;
+      --sidebar-nav-link-font-weight--active: 600;
+      --sidebar-name-color: #e9d5ff;
+      --sidebar-name-font-weight: 700;
+      --sidebar-toggle-background: #1e1433;
+      --content-max-width: 860px;
+      --base-background-color: #0c0716;
+      --base-color: #e2e8f0;
+      --heading-color: #e9d5ff;
+      --heading-h1-color: #a78bfa;
+      --heading-h2-border-color: rgba(167, 139, 250, 0.2);
+      --blockquote-border-color: #7c3aed;
+      --code-theme-background: #1a1028;
+      --code-theme-text: #e9d5ff;
+      --code-inline-background: rgba(167, 139, 250, 0.15);
+      --code-inline-color: #c4b5fd;
+      --link-color: #a78bfa;
+      --link-color--hover: #c4b5fd;
+      --table-head-background: #1a1028;
+      --table-row-even-background: rgba(167, 139, 250, 0.04);
+      --notice-tip-border-color: #a78bfa;
+      --notice-important-border-color: #f59e0b;
+      --search-input-border-color: rgba(167, 139, 250, 0.3);
+      --search-input-background-color: #1a1028;
+      --search-input-color: #e2e8f0;
+      --search-result-heading-color: #a78bfa;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    /* Logo / brand area */
+    .app-name-link {
+      font-size: 1.3em !important;
+      letter-spacing: -0.02em;
+    }
+
+    /* Sidebar category headers */
+    .sidebar-nav > ul > li > a {
+      font-weight: 700 !important;
+      text-transform: uppercase;
+      font-size: 0.75em;
+      letter-spacing: 0.08em;
+      color: #64748b !important;
+      margin-top: 1em;
+    }
+
+    /* Hero badge styling */
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      background: rgba(167, 139, 250, 0.12);
+      border: 1px solid rgba(167, 139, 250, 0.25);
+      color: #c4b5fd;
+      font-size: 0.85em;
+      font-weight: 500;
+    }
+
+    /* Custom alert boxes */
+    .tip, .warning, .important {
+      border-radius: 8px !important;
+      padding: 16px 20px !important;
+    }
+
+    /* Smooth scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(167, 139, 250, 0.25); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(167, 139, 250, 0.45); }
+
+    /* Code block copy button */
+    .docsify-copy-code-button {
+      background: rgba(167, 139, 250, 0.2) !important;
+      color: #c4b5fd !important;
+      border-radius: 4px !important;
+    }
+  </style>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app">Loading docs...</div>
+
+  <script>
+    window.$docsify = {
+      name: '⚡ AinzPromptAPI',
+      nameLink: '/docs/',
+      repo: 'https://github.com/JCFcodex/AinzPromptAPI',
+      loadSidebar: true,
+      subMaxLevel: 3,
+      auto2top: true,
+      search: {
+        placeholder: 'Search docs...',
+        noData: 'No results found.',
+        paths: 'auto',
+        depth: 3,
+      },
+      copyCode: {
+        buttonText: 'Copy',
+        successText: 'Copied!',
+      },
+      pagination: {
+        previousText: '← Previous',
+        nextText: 'Next →',
+        crossChapter: true,
+      },
+      basePath: '/docs/',
+      notFoundPage: true,
+    };
+  </script>
+
+  <!-- Docsify core -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
+
+  <!-- Plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-copy-code@3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-pagination@2/dist/docsify-pagination.min.js"></script>
+
+  <!-- Prism syntax highlighting -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-javascript.min.js"></script>
+</body>
+</html>
