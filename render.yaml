@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: ainzprompt-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npx tsc -p tsconfig.build.json
+    startCommand: node dist/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GROQ_API_KEYS
+        sync: false
+      - key: SESSION_TTL_MINUTES
+        value: "30"
+      - key: RATE_LIMIT_RPM
+        value: "60"
+      - key: RATE_LIMIT_UPLOAD_RPM
+        value: "20"
+      - key: CORS_ORIGIN
+        value: "*"

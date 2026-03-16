@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AinzPromptAPI — Chat Playground</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-tertiary: #1a1a2e;
+      --bg-glass: rgba(26, 26, 46, 0.6);
+      --border: rgba(255, 255, 255, 0.06);
+      --border-focus: rgba(139, 92, 246, 0.5);
+      --text-primary: #e4e4e7;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --accent: #8b5cf6;
+      --accent-hover: #a78bfa;
+      --accent-glow: rgba(139, 92, 246, 0.15);
+      --user-bg: rgba(139, 92, 246, 0.12);
+      --assistant-bg: rgba(255, 255, 255, 0.03);
+      --error: #ef4444;
+      --success: #22c55e;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --font-sans: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    html, body { height: 100%; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ──────────────────────────────────────── */
+    header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+      backdrop-filter: blur(20px);
+    }
+    header .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    header .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent), #6d28d9);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: white;
+    }
+    header h1 {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    header h1 span { color: var(--text-muted); font-weight: 400; }
+    .header-controls {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 6px var(--success);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .status-text { font-size: 12px; color: var(--text-muted); }
+
+    /* ── Layout ──────────────────────────────────────── */
+    .app { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── Sidebar ─────────────────────────────────────── */
+    .sidebar {
+      width: 280px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+    .sidebar h3 {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .field-group { display: flex; flex-direction: column; gap: 6px; }
+    label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    select, input[type="text"], textarea {
+      font-family: var(--font-sans);
+      font-size: 13px;
+      padding: 8px 10px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--border-focus);
+    }
+    textarea { resize: vertical; min-height: 60px; font-size: 12px; }
+    .session-row {
+      display: flex;
+      gap: 6px;
+    }
+    .session-row input { flex: 1; font-family: var(--font-mono); font-size: 11px; }
+    .btn-sm {
+      font-size: 11px;
+      padding: 6px 10px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .btn-sm:hover { background: var(--accent-glow); border-color: var(--border-focus); color: var(--text-primary); }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .toggle {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      background: var(--bg-tertiary);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle.active { background: var(--accent); border-color: var(--accent); }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: white;
+      transition: transform 0.2s;
+    }
+    .toggle.active::after { transform: translateX(16px); }
+
+    /* file upload area */
+    .upload-zone {
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .upload-zone:hover { border-color: var(--border-focus); color: var(--text-secondary); }
+    .upload-zone.has-file { border-color: var(--accent); color: var(--accent); border-style: solid; }
+    .upload-zone input { display: none; }
+
+    /* ── Chat Area ───────────────────────────────────── */
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .msg {
+      max-width: 720px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 14px 18px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      line-height: 1.6;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .msg.user {
+      background: var(--user-bg);
+      border: 1px solid rgba(139, 92, 246, 0.08);
+    }
+    .msg.assistant {
+      background: var(--assistant-bg);
+      border: 1px solid var(--border);
+    }
+    .msg.error {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+    }
+    .msg .role {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .msg.user .role { color: var(--accent); }
+    .msg.assistant .role { color: var(--text-muted); }
+    .msg.error .role { color: var(--error); }
+    .msg .content { white-space: pre-wrap; word-break: break-word; }
+    .msg .meta {
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    .typing-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 14px;
+      background: var(--accent);
+      margin-left: 2px;
+      animation: blink 0.8s infinite;
+      vertical-align: text-bottom;
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    .welcome {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      gap: 12px;
+      color: var(--text-muted);
+    }
+    .welcome-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--accent), #6d28d9);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+    .welcome h2 { font-size: 18px; font-weight: 600; color: var(--text-primary); }
+    .welcome p { font-size: 13px; max-width: 360px; text-align: center; line-height: 1.5; }
+
+    /* ── Input Bar ───────────────────────────────────── */
+    .input-bar {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-secondary);
+    }
+    .input-row {
+      max-width: 720px;
+      margin: 0 auto;
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+    }
+    .input-row textarea {
+      flex: 1;
+      min-height: 44px;
+      max-height: 160px;
+      padding: 12px 14px;
+      font-size: 14px;
+      border-radius: var(--radius);
+      resize: none;
+      line-height: 1.4;
+    }
+    .btn-send {
+      padding: 12px 20px;
+      background: linear-gradient(135deg, var(--accent), #6d28d9);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .btn-send:hover { transform: translateY(-1px); box-shadow: 0 4px 16px var(--accent-glow); }
+    .btn-send:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* ── Responsive ──────────────────────────────────── */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">A</div>
+    <h1>AinzPromptAPI <span>Playground</span></h1>
+  </div>
+  <div class="header-controls">
+    <div class="status-dot"></div>
+    <span class="status-text">Connected</span>
+  </div>
+</header>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div>
+      <h3>Model</h3>
+      <div class="field-group">
+        <select id="model">
+          <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>
+          <option value="llama-3.1-8b-instant">llama-3.1-8b-instant</option>
+          <option value="meta-llama/llama-4-scout-17b-16e-instruct">llama-4-scout-17b (vision)</option>
+          <option value="gemma2-9b-it">gemma2-9b-it</option>
+          <option value="deepseek-r1-distill-llama-70b">deepseek-r1-distill-70b</option>
+          <option value="mistral-saba-24b">mistral-saba-24b</option>
+          <option value="qwen-qwq-32b">qwen-qwq-32b</option>
+        </select>
+      </div>
+    </div>
+
+    <div>
+      <h3>Session</h3>
+      <div class="field-group">
+        <div class="session-row">
+          <input type="text" id="sessionId" readonly />
+          <button class="btn-sm" onclick="newSession()">New</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>Streaming</h3>
+      <div class="field-group">
+        <div class="toggle-row">
+          <label>Real-time SSE</label>
+          <div class="toggle active" id="streamToggle" onclick="toggleStream()"></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>System Prompt</h3>
+      <div class="field-group">
+        <textarea id="system" placeholder="Optional — e.g. 'You are a helpful coding assistant'"></textarea>
+      </div>
+    </div>
+
+    <div>
+      <h3>Image Upload</h3>
+      <div class="field-group">
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+          <input type="file" id="fileInput" accept="image/jpeg,image/png,image/gif,image/webp" onchange="handleFile(this)" />
+          <span id="uploadLabel">📷 Click to attach image</span>
+        </div>
+        <button class="btn-sm" id="clearFile" style="display:none" onclick="clearImage()">✕ Remove image</button>
+      </div>
+    </div>
+
+    <div style="margin-top: auto">
+      <button class="btn-sm" style="width: 100%; text-align: center;" onclick="clearChat()">Clear Chat</button>
+    </div>
+  </aside>
+
+  <!-- Chat -->
+  <main class="chat-area">
+    <div class="messages" id="messages">
+      <div class="welcome">
+        <div class="welcome-icon">⚡</div>
+        <h2>AinzPromptAPI Playground</h2>
+        <p>Send a message to test chat completions, streaming, vision, and file uploads — all powered by Groq.</p>
+      </div>
+    </div>
+    <div class="input-bar">
+      <div class="input-row">
+        <textarea id="input" placeholder="Type a message..." rows="1" onkeydown="handleKey(event)"></textarea>
+        <button class="btn-send" id="sendBtn" onclick="send()">Send</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const API = location.origin;
+let streaming = true;
+let sessionId = crypto.randomUUID();
+let sending = false;
+let attachedFile = null;
+
+document.getElementById('sessionId').value = sessionId;
+
+// ── Auto-resize textarea ────────────────────────────
+const input = document.getElementById('input');
+input.addEventListener('input', () => {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 160) + 'px';
+});
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+}
+
+function toggleStream() {
+  streaming = !streaming;
+  document.getElementById('streamToggle').classList.toggle('active', streaming);
+}
+
+function newSession() {
+  sessionId = crypto.randomUUID();
+  document.getElementById('sessionId').value = sessionId;
+  clearChat();
+}
+
+function clearChat() {
+  const el = document.getElementById('messages');
+  el.innerHTML = `
+    <div class="welcome">
+      <div class="welcome-icon">⚡</div>
+      <h2>AinzPromptAPI Playground</h2>
+      <p>Send a message to test chat completions, streaming, vision, and file uploads — all powered by Groq.</p>
+    </div>`;
+}
+
+function handleFile(input) {
+  if (input.files[0]) {
+    attachedFile = input.files[0];
+    document.getElementById('uploadLabel').textContent = `📎 ${attachedFile.name}`;
+    document.getElementById('uploadZone').classList.add('has-file');
+    document.getElementById('clearFile').style.display = 'block';
+    // Auto-switch to vision model
+    document.getElementById('model').value = 'meta-llama/llama-4-scout-17b-16e-instruct';
+  }
+}
+
+function clearImage() {
+  attachedFile = null;
+  document.getElementById('fileInput').value = '';
+  document.getElementById('uploadLabel').textContent = '📷 Click to attach image';
+  document.getElementById('uploadZone').classList.remove('has-file');
+  document.getElementById('clearFile').style.display = 'none';
+}
+
+function addMsg(role, content, meta) {
+  // Remove welcome screen on first message
+  const welcome = document.querySelector('.welcome');
+  if (welcome) welcome.remove();
+
+  const el = document.createElement('div');
+  el.className = `msg ${role}`;
+  el.innerHTML = `<div class="role">${role}</div><div class="content">${escapeHtml(content)}</div>`;
+  if (meta) el.innerHTML += `<div class="meta">${meta}</div>`;
+  document.getElementById('messages').appendChild(el);
+  scrollBottom();
+  return el;
+}
+
+function scrollBottom() {
+  const m = document.getElementById('messages');
+  m.scrollTop = m.scrollHeight;
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+async function send() {
+  const text = input.value.trim();
+  if (!text || sending) return;
+
+  sending = true;
+  document.getElementById('sendBtn').disabled = true;
+  input.value = '';
+  input.style.height = 'auto';
+
+  const model = document.getElementById('model').value;
+  const system = document.getElementById('system').value.trim() || undefined;
+
+  // Show user message
+  addMsg('user', text + (attachedFile ? `\n📎 ${attachedFile.name}` : ''));
+
+  // File upload path
+  if (attachedFile) {
+    await sendWithUpload(text, model, system);
+    return;
+  }
+
+  if (streaming) {
+    await sendStream(text, model, system);
+  } else {
+    await sendBlocking(text, model, system);
+  }
+}
+
+async function sendBlocking(text, model, system) {
+  const msgEl = addMsg('assistant', '');
+  const contentEl = msgEl.querySelector('.content');
+  contentEl.innerHTML = '<span class="typing-cursor"></span>';
+
+  try {
+    const res = await fetch(`${API}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, sessionId, model, system }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || `HTTP ${res.status}`);
+    contentEl.textContent = data.reply;
+    msgEl.innerHTML += `<div class="meta">${data.model} · ${data.usage.total_tokens} tokens</div>`;
+  } catch (err) {
+    msgEl.className = 'msg error';
+    msgEl.querySelector('.role').textContent = 'error';
+    contentEl.textContent = err.message;
+  }
+
+  sending = false;
+  document.getElementById('sendBtn').disabled = false;
+  scrollBottom();
+}
+
+async function sendStream(text, model, system) {
+  const msgEl = addMsg('assistant', '');
+  const contentEl = msgEl.querySelector('.content');
+  let fullText = '';
+  contentEl.innerHTML = '<span class="typing-cursor"></span>';
+
+  try {
+    const res = await fetch(`${API}/api/stream`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, sessionId, model, system }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error?.message || `HTTP ${res.status}`);
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      for (const line of chunk.split('\n')) {
+        if (!line.startsWith('data: ')) continue;
+        const token = line.slice(6);
+        if (token === '[DONE]') break;
+        if (token.startsWith('[ERROR]')) throw new Error(token.slice(8));
+        // Skip metadata event (first SSE contains {sessionId, model})
+        if (token.startsWith('{') && token.includes('"sessionId"')) continue;
+        fullText += token;
+        contentEl.textContent = fullText;
+        scrollBottom();
+      }
+    }
+
+    if (!fullText) contentEl.textContent = '(empty response)';
+    msgEl.innerHTML += `<div class="meta">${model} · streamed</div>`;
+  } catch (err) {
+    if (!fullText) {
+      msgEl.className = 'msg error';
+      msgEl.querySelector('.role').textContent = 'error';
+      contentEl.textContent = err.message;
+    }
+  }
+
+  sending = false;
+  document.getElementById('sendBtn').disabled = false;
+  scrollBottom();
+}
+
+async function sendWithUpload(text, model, system) {
+  const msgEl = addMsg('assistant', '');
+  const contentEl = msgEl.querySelector('.content');
+  contentEl.innerHTML = '<span class="typing-cursor"></span>';
+
+  try {
+    const fd = new FormData();
+    fd.append('image', attachedFile);
+    fd.append('message', text);
+    fd.append('sessionId', sessionId);
+    if (system) fd.append('system', system);
+
+    const res = await fetch(`${API}/api/chat/upload`, {
+      method: 'POST',
+      body: fd,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || `HTTP ${res.status}`);
+    contentEl.textContent = data.reply;
+    msgEl.innerHTML += `<div class="meta">${data.model} · ${data.usage.total_tokens} tokens</div>`;
+  } catch (err) {
+    msgEl.className = 'msg error';
+    msgEl.querySelector('.role').textContent = 'error';
+    contentEl.textContent = err.message;
+  }
+
+  clearImage();
+  sending = false;
+  document.getElementById('sendBtn').disabled = false;
+  scrollBottom();
+}
+</script>
+
+</body>
+</html>
