@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-RUN npx tsc -p tsconfig.build.json
+RUN npx tsc -p tsconfig.build.json && npx tsc-alias -p tsconfig.build.json
 
 # ── Runtime stage ────────────────────────────────────────
 FROM node:20-alpine AS runner
